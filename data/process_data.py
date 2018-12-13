@@ -3,6 +3,18 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
+    '''Loads ands merge message and categories csv files
+    
+    Note: The first line of each file must be the column names and
+        both csv files must have an 'id' column.
+        
+    Args:
+        message_filepath (str)
+        categories_filepath (str)
+    
+    Returns:
+        df (pandas.DataFrame)
+    '''
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
     
@@ -11,6 +23,17 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
+    '''Cleans the Disaster Reponse Pipeline dataframe
+        - Splits categories into separate columns with 0 or 1 as values
+        - Drops 'child_alone' category
+        - Drops duplicates
+
+    Args:
+        df (pandas.DataFrame)
+
+    Returns:
+        df (pandas.DataFrame): cleaned dataframe
+    '''
     # Split categories into separate category columns
     categories = df.categories.str.split(';', expand=True)
     categories.columns = categories.loc[0].apply(lambda x: x[:-2])
@@ -24,11 +47,18 @@ def clean_data(df):
     
     df.drop('categories', axis='columns', inplace=True)
     df = pd.concat([df, categories], axis='columns')
+
     df.drop_duplicates(subset='id', inplace=True)
     return df
 
 
 def save_data(df, database_filename):
+    '''Saves the data as an SQLite database
+    
+    Args:
+        df (pandas.DataFrame)
+        data_filename (str)
+    '''
     engine = create_engine('sqlite:///'+database_filename)
     df.to_sql('messages', engine, index=False)
     return None
