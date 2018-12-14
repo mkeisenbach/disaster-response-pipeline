@@ -42,6 +42,9 @@ def clean_data(df):
         categories[column] = categories[column].str[-1:]
         categories[column] = categories[column].apply(int)
     
+    # related column should be binary, replace 2's with 1's
+    categories.related.replace(inplace=True, to_replace=2, value=1)
+    
     # Drop the child_alone category because all values are zeros 
     categories.drop('child_alone', axis='columns', inplace=True)
     
