@@ -15,17 +15,36 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import classification_report, hamming_loss
 
 def load_data(database_filepath):
+    '''Loads database file
+        
+    Args:
+        database_filepath (str)
+    
+    Returns:
+        X (pandas.DataFrame)
+        Y (pandas.DataFrame)
+        category_names (Index)
+    '''
     engine = create_engine('sqlite:///'+database_filepath)
     df = pd.read_sql_table('messages', engine)    
     
     X = df.message
-    y = df.drop(['id', 'message', 'original', 'genre'], axis='columns')
-    category_names = y.columns
+    Y = df.drop(['id', 'message', 'original', 'genre'], axis='columns')
+    category_names = Y.columns
     
-    return X, y, category_names
+    return X, Y, category_names
 
 
 def tokenize(text):
+    '''Returns cleaned tokens from text
+        - Removes punctuation
+        - Lemmatizes tokens
+        - Converts to lowercase and removes extra whitespace
+    Args: 
+        text (str)
+    Returns:
+        clean_tokens (list): list of tokens
+    '''
     # remove punctuation
     text = re.sub(r"[^a-zA-Z0-9]", " ", text)
     
@@ -42,6 +61,11 @@ def tokenize(text):
     return clean_tokens
 
 def build_model():
+    '''Builds a parameter optimized model
+    
+    Returns:
+        cv (GridSearchCV object)
+    '''
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -59,6 +83,14 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    '''Evaluates a multi-label classifier and prints the results
+    
+    Args:
+        model: classifier model
+        X_test: test data
+        Y_test (pandas.DataFrame): test labels
+        category_names: names for test label columns
+    '''
     Y_pred = pd.DataFrame(model.predict(X_test))
     
     for i in range(Y_test.shape[1]):
@@ -70,6 +102,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    '''Saves the model as a pickle file'''
     with open('classifier.pkl', 'wb') as f:
         pickle.dump(model, f)    
     return None
