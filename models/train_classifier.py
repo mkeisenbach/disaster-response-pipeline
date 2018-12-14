@@ -65,7 +65,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
         print('Column {}, {}'.format(i, category_names[i]))
         print(classification_report(Y_test.iloc[:,i], Y_pred.iloc[:,i]))
     
-    print(hamming_loss(Y_test, Y_pred))
+    print('Hamming loss: ', hamming_loss(Y_test, Y_pred))
     return None
 
 
