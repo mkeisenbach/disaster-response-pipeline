@@ -7,7 +7,9 @@ from nltk.tokenize import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
+
+from plotly.graph_objs import Bar, Histogram
+
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 
@@ -26,11 +28,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///../data/DisasterResponse.db')
+df = pd.read_sql_table('messages', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+model = joblib.load("../models/classifier.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -40,27 +42,54 @@ def index():
     
     # extract data needed for visuals
     # TODO: Below is an example - modify to extract data for your own visuals
-    genre_counts = df.groupby('genre').count()['message']
-    genre_names = list(genre_counts.index)
+    counts = df.iloc[:,4:].apply(lambda x: x.value_counts()).T
+    counts.sort_values(by=1, ascending=False, inplace=True)
+    categories = pd.Series(counts.index).str.replace('_', ' ').str.title()
+
+    row_sums = df.iloc[:,4:].sum(axis='columns')
     
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
+    colors = [plotly.colors.DEFAULT_PLOTLY_COLORS[i % len(plotly.colors.DEFAULT_PLOTLY_COLORS)] for i in range(len(counts))]
+
     graphs = [
         {
             'data': [
                 Bar(
-                    x=genre_names,
-                    y=genre_counts
+                    x=categories,
+                    y=counts[1],
+                    marker=dict(color=colors),
                 )
             ],
 
             'layout': {
-                'title': 'Distribution of Message Genres',
+                'title': 'Distribution of Message Categories',
                 'yaxis': {
                     'title': "Count"
                 },
                 'xaxis': {
-                    'title': "Genre"
+                    'title': "Category",
+                    'tickangle': -90
+                },
+                'margin': {
+                    'b': 160
+                }
+            }
+        },
+        {
+            'data': [
+                Histogram(
+                    x=row_sums
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Counts of Multiple Categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Number of categories in message"
                 }
             }
         }
