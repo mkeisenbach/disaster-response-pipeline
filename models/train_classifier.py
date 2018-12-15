@@ -103,7 +103,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 def save_model(model, model_filepath):
     '''Saves the model as a pickle file'''
-    with open('classifier.pkl', 'wb') as f:
+    with open(model_filepath, 'wb') as f:
         pickle.dump(model, f)    
     return None
 
