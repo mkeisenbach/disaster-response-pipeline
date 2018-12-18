@@ -3,6 +3,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 import re
 import pickle
+import np
 
 from nltk.tokenize import word_tokenize
 from nltk.stem.wordnet import WordNetLemmatizer
@@ -12,7 +13,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.metrics import classification_report, hamming_loss
+from sklearn.metrics import classification_report, hamming_loss, recall_score
 
 def load_data(database_filepath):
     '''Loads database file
@@ -60,6 +61,7 @@ def tokenize(text):
         
     return clean_tokens
 
+
 def build_model():
     '''Builds a parameter optimized model
     
@@ -84,6 +86,26 @@ def build_model():
     return cv
 
 
+def get_scores(scorer, y_true, y_pred, average):
+    '''Runs the scorer on all the paired columns
+    
+    Args:
+        scorer: The scoring function to use
+        y_true (pandas.DataFrame)
+        y_pred (pandas.DataFrame)
+        average (str): the average parameter passed to scorer
+    
+    Returns:
+        scores (list): list of individual scores or tuples depending on
+            which average option was used
+    '''
+    scores = []
+    for i in range(0, y_true.shape[1]):
+        score = scorer(y_true.iloc[:,i], y_pred.iloc[:,i], average=average)
+        scores.append(score)
+    return scores
+
+
 def evaluate_model(model, X_test, Y_test, category_names):
     '''Evaluates a multi-label classifier and prints the results
     
@@ -98,6 +120,11 @@ def evaluate_model(model, X_test, Y_test, category_names):
     for i in range(Y_test.shape[1]):
         print('Column {}, {}'.format(i, category_names[i]))
         print(classification_report(Y_test.iloc[:,i], Y_pred.iloc[:,i]))
+    
+    average = None # reports only pos_label
+    scorer = recall_score
+    scores = get_scores(scorer, Y_test, pd.DataFrame(Y_pred), average)
+    print(scorer.__name__, average, np.mean(scores))
     
     print('Hamming loss: ', hamming_loss(Y_test, Y_pred))
     return None
