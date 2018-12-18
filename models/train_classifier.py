@@ -3,7 +3,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 import re
 import pickle
-import np
+import numpy as np
 
 from nltk.tokenize import word_tokenize
 from nltk.stem.wordnet import WordNetLemmatizer
