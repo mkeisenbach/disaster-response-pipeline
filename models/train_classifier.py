@@ -73,12 +73,14 @@ def build_model():
     ])
     
     parameters = {
-        'vect__ngram_range':[(1,1), (1,2)],
+        'vect__stop_words':['english'],
+        'vect__ngram_range':[(1,2)],
+        'vect__max_features':[40000],
         'clf__estimator__learning_rate':[0.75, 1.0],
         'clf__estimator__n_estimators':[50, 75]
     }
     
-    cv = GridSearchCV(pipeline, parameters, scoring='roc_auc', cv=3)
+    cv = GridSearchCV(pipeline, parameters, scoring='recall_macro', cv=3)    
     return cv
 
 
