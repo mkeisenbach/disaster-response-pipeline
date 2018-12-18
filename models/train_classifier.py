@@ -132,9 +132,12 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 def save_model(model, model_filepath):
     '''Saves the model as a pickle file'''
-    with open(model_filepath, 'wb') as f:
-        pickle.dump(model, f)    
-    return None
+    try:
+        f = open(model_filepath, 'wb')
+        pickle.dump(model, f)
+        return True
+    except IOError:
+        return False
 
 
 def main():
@@ -154,9 +157,10 @@ def main():
         evaluate_model(model, X_test, Y_test, category_names)
 
         print('Saving model...\n    MODEL: {}'.format(model_filepath))
-        save_model(model, model_filepath)
-
-        print('Trained model saved!')
+        if save_model(model, model_filepath):
+            print('Trained model saved!')
+        else:
+            print('Trained model NOT saved!')
 
     else:
         print('Please provide the filepath of the disaster messages database '\
