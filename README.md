@@ -38,6 +38,9 @@ The data is quite imbalanced. Some categories have very few examples (e.g. missi
 - Model Selection: Some machine learning algorithms handle class imbalance better than others, e.g. Random Forest and Boosted learners. AdaBoost was found to be the better model for this dataset.
 
 ## Results
+Results including "child alone":
+AdaBoostCV, Recall: 0.352, Hamming Loss: 0.0532
+
 Results with "child alone" removed:
 
 | Model | Recall | Hamming Loss |
@@ -47,5 +50,4 @@ Results with "child alone" removed:
 | AdaBoost| 0.651 | 0.0533 |
 | AdaBoostCV| 0.653 | 0.0534 |
 
-Results including "child alone":
-AdaBoostCV, 0.35173592, 0.0532
+![Chart: Recall](/images/recall.png)
